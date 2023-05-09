@@ -1,5 +1,4 @@
-﻿using System.Dynamic;
-using Dapper;
+﻿using Dapper;
 using Movies.Application.Database;
 using Movies.Application.Models;
 
