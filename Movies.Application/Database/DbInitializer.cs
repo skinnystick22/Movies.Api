@@ -41,5 +41,18 @@ public class DbInitializer
         await connection.ExecuteAsync("""
         CREATE NONCLUSTERED INDEX IX_Genre_MovieId_Include_Name ON Genre (MovieId) INCLUDE (Name)
         """);
+
+        await connection.ExecuteAsync("""
+        create table dbo.Rating
+        (
+            UserId  UNIQUEIDENTIFIER NOT NULL ,
+            MovieId UNIQUEIDENTIFIER NOT NULL
+                CONSTRAINT FK_Rating_Movie
+                    REFERENCES dbo.Movie,
+            Rating  TINYINT          NOT NULL,
+            CONSTRAINT PK_Rating
+                PRIMARY KEY (UserId, MovieId)
+        )
+        """);
     }
 }
