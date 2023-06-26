@@ -16,7 +16,7 @@ public static class ContractMapping
             Genres = request.Genres.ToList()
         };
     }
-    
+
     public static Movie MapToMovie(this UpdateMovieRequest request, Guid id)
     {
         return new Movie
@@ -27,7 +27,7 @@ public static class ContractMapping
             Genres = request.Genres.ToList()
         };
     }
-    
+
     public static MovieResponse MapToResponse(this Movie movie)
     {
         return new MovieResponse
@@ -41,7 +41,7 @@ public static class ContractMapping
             Genres = movie.Genres
         };
     }
-    
+
     public static MoviesResponse MapToResponse(this IEnumerable<Movie> movies)
     {
         return new MoviesResponse
@@ -65,7 +65,7 @@ public static class ContractMapping
         return new MovieRatingsResponse
         {
             Items = ratings.Select(rating => rating.MapToResponse())
-        }; 
+        };
     }
 
     public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest request)
@@ -73,10 +73,13 @@ public static class ContractMapping
         return new GetAllMoviesOptions
         {
             Title = request.Title,
-            YearOfRelease = request.Year
+            YearOfRelease = request.YearOfRelease,
+            SortField = request.SortBy?.Trim('+', '-'),
+            SortOrder = request.SortBy is null ? SortOrder.Unsorted :
+                request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending
         };
     }
-    
+
     public static GetAllMoviesOptions WithUser(this GetAllMoviesOptions options, Guid? userId)
     {
         options.UserId = userId;

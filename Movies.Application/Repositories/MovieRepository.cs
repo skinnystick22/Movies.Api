@@ -110,7 +110,15 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
-        var result = await connection.QueryAsync(new CommandDefinition("""
+        var orderClause = string.Empty;
+        if (options.SortField is not null)
+        {
+            orderClause = $"""
+            ORDER BY M.{options.SortField} {(options.SortOrder == SortOrder.Ascending ? "ASC" : "DESC")}
+            """;
+        }
+
+        var result = await connection.QueryAsync(new CommandDefinition($"""
         SELECT M.Id, M.Title, M.YearOfRelease, STRING_AGG(G.Name, ', ') AS Genres, AVG(R.Rating) as Rating, MYR.Rating as UserRating
         FROM Movie as M
             LEFT JOIN Genre as G on M.Id = G.MovieId
@@ -119,6 +127,7 @@ public class MovieRepository : IMovieRepository
         WHERE (@Title IS NULL OR M.Title LIKE @Title)
             AND (@YearOfRelease IS NULL OR M.YearOfRelease = @YearOfRelease)
         GROUP BY M.Id, M.Title, M.YearOfRelease, MYR.Rating
+        {orderClause}
         """, new { options.UserId, Title = $"%{options.Title}%", options.YearOfRelease }, cancellationToken: cancellationToken));
 
         return result.Select(x => new Movie
