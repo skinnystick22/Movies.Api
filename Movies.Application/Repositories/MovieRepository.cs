@@ -110,7 +110,7 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
-        var orderClause = string.Empty;
+        var orderClause = "ORDER BY M.Id";
         if (options.SortField is not null)
         {
             orderClause = $"""
@@ -119,7 +119,7 @@ public class MovieRepository : IMovieRepository
         }
 
         var result = await connection.QueryAsync(new CommandDefinition($"""
-        SELECT M.Id, M.Title, M.YearOfRelease, STRING_AGG(G.Name, ', ') AS Genres, AVG(R.Rating) as Rating, MYR.Rating as UserRating
+        SELECT M.Id, M.Title, M.YearOfRelease, STRING_AGG(G.Name, ',') AS Genres, AVG(R.Rating) as Rating, MYR.Rating as UserRating
         FROM Movie as M
             LEFT JOIN Genre as G on M.Id = G.MovieId
             LEFT JOIN Rating as R on R.MovieId = M.Id
@@ -128,7 +128,18 @@ public class MovieRepository : IMovieRepository
             AND (@YearOfRelease IS NULL OR M.YearOfRelease = @YearOfRelease)
         GROUP BY M.Id, M.Title, M.YearOfRelease, MYR.Rating
         {orderClause}
-        """, new { options.UserId, Title = $"%{options.Title}%", options.YearOfRelease }, cancellationToken: cancellationToken));
+        OFFSET @PageOffset ROWS
+        FETCH NEXT @PageSize ROWS ONLY
+        """,
+            new
+            {
+                options.UserId,
+                Title = $"%{options.Title}%",
+                options.YearOfRelease,
+                options.PageSize,
+                PageOffset = (options.Page - 1) * options.PageSize
+            },
+            cancellationToken: cancellationToken));
 
         return result.Select(x => new Movie
         {
@@ -202,5 +213,18 @@ public class MovieRepository : IMovieRepository
         FROM Movie
         WHERE Id = @Id
         """, new { id }, cancellationToken: cancellationToken));
+    }
+
+    public async Task<int> GetCountAsync(string? title, int? yearOfRelease,
+        CancellationToken cancellationToken = default)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
+
+        return await connection.QuerySingleAsync<int>(new CommandDefinition("""
+        SELECT COUNT(Id)
+        FROM Movie
+        WHERE (@Title IS NULL OR Title LIKE @Title)
+            AND (@YearOfRelease IS NULL OR YearOfRelease = @YearOfRelease)
+        """, new { Title = $"%{title}%", YearOfRelease = yearOfRelease }, cancellationToken: cancellationToken));
     }
 }
