@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api;
 using Movies.Api.Auth;
+using Movies.Api.Health;
 using Movies.Api.Mapping;
 using Movies.Api.Swagger;
 using Movies.Application;
@@ -54,6 +55,9 @@ builder.Services.AddSwaggerGen(options => options.OperationFilter<SwaggerDefault
 
 builder.Services.AddControllers();
 
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>(DatabaseHealthCheck.HealthCheckName);
+
 builder.Services.AddApplication();
 builder.Services.AddDatabase(configuration.GetConnectionString("DefaultConnection")!);
 
@@ -71,6 +75,8 @@ if (app.Environment.IsDevelopment())
         }
     });
 }
+
+app.MapHealthChecks("_health");
 
 app.UseHttpsRedirection();
 
