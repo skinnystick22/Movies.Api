@@ -53,6 +53,7 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerGen(options => options.OperationFilter<SwaggerDefaultValues>());
 
+builder.Services.AddResponseCaching();
 builder.Services.AddControllers();
 
 builder.Services.AddHealthChecks()
@@ -82,6 +83,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseResponseCaching();
+
 app.UseMiddleware<ValidationMappingMiddleware>();
 app.MapControllers();
 
