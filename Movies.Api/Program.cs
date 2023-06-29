@@ -3,7 +3,6 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Movies.Api;
 using Movies.Api.Auth;
 using Movies.Api.Health;
 using Movies.Api.Mapping;
@@ -39,6 +38,8 @@ builder.Services.AddAuthorization(options =>
         c.User.HasClaim(m => m is { Type: AuthConstants.AdminUserClaimName, Value: "true" }) ||
         c.User.HasClaim(m => m is { Type: AuthConstants.TrustedMemberClaimName, Value: "true" })));
 });
+
+builder.Services.AddScoped<ApiKeyAuthFilter>();
 
 builder.Services.AddApiVersioning(options =>
 {
