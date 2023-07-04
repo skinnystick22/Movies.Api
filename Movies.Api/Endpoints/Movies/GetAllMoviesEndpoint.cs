@@ -30,7 +30,10 @@ public static class GetAllMoviesEndpoint
                 return TypedResults.Ok(response);
             })
             .WithName(Name)
-            .Produces<MoviesResponse>(StatusCodes.Status200OK);
+            .Produces<MoviesResponse>(StatusCodes.Status200OK)
+            .WithApiVersionSet(ApiVersioning.VersionSet)
+            .HasApiVersion(1.0)
+            .CacheOutput("MovieCache");
 
         return app;
     }

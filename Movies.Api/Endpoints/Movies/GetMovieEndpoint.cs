@@ -33,7 +33,8 @@ public static class GetMovieEndpoint
                 })
             .WithName(Name)
             .Produces<MovieResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .CacheOutput("MovieCache");
 
         return app;
     }
