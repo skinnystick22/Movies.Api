@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.OutputCaching;
+using Movies.Api.Auth;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
+using Movies.Contracts.Responses;
 
 namespace Movies.Api.Endpoints.Movies;
 
@@ -23,7 +25,10 @@ public static class CreateMovieEndpoint
 
                 return TypedResults.CreatedAtRoute(response, GetMovieEndpoint.Name, new { idOrSlug = response.Id });
             })
-            .WithName(Name);
+            .WithName(Name)
+            .Produces<MovieResponse>(StatusCodes.Status201Created)
+            .Produces<ValidationFailureResponse>(StatusCodes.Status400BadRequest)
+            .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
 
         return app;
     }

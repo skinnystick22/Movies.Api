@@ -49,8 +49,9 @@ builder.Services.AddApiVersioning(options =>
     options.ReportApiVersions = true;
     options.ApiVersionReader = new MediaTypeApiVersionReader("api-version");
 })
-    .AddMvc()
     .AddApiExplorer();
+
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerGen(options => options.OperationFilter<SwaggerDefaultValues>());
