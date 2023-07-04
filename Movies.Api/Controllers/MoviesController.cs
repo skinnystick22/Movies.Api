@@ -42,20 +42,20 @@ public class MoviesController : ControllerBase
     [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] string idOrSlug, CancellationToken token)
-    {
-        var userId = HttpContext.GetUserId();
+    {var userId = HttpContext.GetUserId();
+             
+             var movie = Guid.TryParse(idOrSlug, out var id)
+                 ? await _movieService.GetByIdAsync(id, userId, token)
+                 : await _movieService.GetBySlugAsync(idOrSlug, userId, token);
+             
+             if (movie is null)
+             {
+                 return NotFound();
+             }
+     
+             var response = movie.MapToResponse();
+             return Ok(response);
         
-        var movie = Guid.TryParse(idOrSlug, out var id)
-            ? await _movieService.GetByIdAsync(id, userId, token)
-            : await _movieService.GetBySlugAsync(idOrSlug, userId, token);
-        
-        if (movie is null)
-        {
-            return NotFound();
-        }
-
-        var response = movie.MapToResponse();
-        return Ok(response);
     }
     
     [HttpGet(ApiEndpoints.Movies.GetAll)]
@@ -70,8 +70,8 @@ public class MoviesController : ControllerBase
 
         var movies = await _movieService.GetAllAsync(options, token);
         var movieCount = await _movieService.GetCountAsync(options.Title, options.YearOfRelease, token);
-        var response = movies.MapToResponse(request.Page, request.PageSize, movieCount);
-        return Ok(response);
+        // var response = movies.MapToResponse(request.Page, request.PageSize, movieCount);
+        return Ok();
     }
     
     [Authorize(Policy = AuthConstants.TrustedMemberPolicyName)]
